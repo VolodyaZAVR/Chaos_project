@@ -1,7 +1,3 @@
-from generator import generate
-import math
-
-
 def logical_xor(a, b):
     if bool(a) == bool(b):
         return 0
@@ -9,20 +5,23 @@ def logical_xor(a, b):
         return 1
 
 
-def decode_file(binary):
+def decode_file(binary, key):
     temp_binary = [0] * len(binary)
     for i in range(len(binary)):
         temp_binary[i] = int(binary[i])
 
-    key = generate(0.5, 0.5, 3, 0.5, math.pi / 2, len(binary))
-    vectorInit = generate(0.5, 0.5, 3, 0.5, math.pi / 2, 256)
+    temp_key = [0] * len(key);
+    for i in range(len(key)):
+        temp_key[i] = int(key[i])
+
+    vectorInit = [0] * 128
     for i in range(128):
-        vectorInit[i] = int(vectorInit[128 + i])
+        vectorInit[i] = int(key[128 + i])
 
     i = 0
     j = 0
     while (128 * i + j < len(temp_binary)):
-        temp_binary[128 * i + j] = int(logical_xor(temp_binary[128 * i + j], key[128 * i + j]))
+        temp_binary[128 * i + j] = int(logical_xor(temp_binary[128 * i + j], temp_key[128 * i + j]))
         temp_binary[128 * i + j] = int(logical_xor(temp_binary[128 * i + j], vectorInit[j]))
         j += 1
         if (j >= 128):
