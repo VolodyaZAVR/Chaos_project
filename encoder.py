@@ -1,46 +1,39 @@
-def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
-    bits = bin(int.from_bytes(text.encode(encoding, errors), 'big'))[2:]
-    return bits.zfill(8 * ((len(bits) + 7) // 8))
+from generator import generate
+import math
 
 
 def logical_xor(a, b):
     if bool(a) == bool(b):
-        return False
+        return 0
     else:
-        return a or b
+        return 1
 
 
-def encrypt_file(file_name, key, n):
-    with open(file_name, "r") as input_file:
-        filecontent = input_file.read()
+def encrypt_file(binary):
+    temp_binary = [0] * len(binary)
+    for i in range(len(binary)):
+        temp_binary[i] = int(binary[i])
 
-    filecontent_in_bits = ''
-    for i in range(len(filecontent)):
-        symbol = text_to_bits(filecontent[i])
-        filecontent_in_bits += str(symbol)
+    key = generate(0.5, 0.5, 3, 0.5, math.pi / 2, len(temp_binary))
 
-    temp_key = [0 for i in range(n)]
-    for i in range(n):
-        temp_key[i] = key[i]
+    for i in range(len(temp_binary)):
+        temp_binary[i] = logical_xor(temp_binary[i], key[i])
 
-    temp_filecontent_in_bits = [0 for i in range(len(filecontent_in_bits))]
-    for i in range(len(filecontent_in_bits)):
-        temp_filecontent_in_bits[i] = int(filecontent_in_bits[i])
+    key = generate(0.5, 0.5, 3, 0.5, math.pi / 2, 256)
+    for i in range(128):
+        key[i] = key[128 + i]
 
     i = 0
     j = 0
-    while ((n * i + j) < (len(filecontent_in_bits))):
-        a = bool(temp_filecontent_in_bits[n * i + j])
-        b = bool(temp_key[j])
-        temp_filecontent_in_bits[n * i + j] = int(logical_xor(a, b))
+    while (128 * i + j < len(temp_binary)):
+        temp_binary[128 * i + j] = int(logical_xor(temp_binary[128 * i + j], key[j]))
         j += 1
-        if (j >= n):
-            j = 0
-            for cnt in range(n):
-                temp_key[cnt] = temp_filecontent_in_bits[n * i + cnt]
+        if (j >= 128):
             i += 1
+            for j in range(128):
+                key[j] = int(temp_binary[128 * (i - 1) + j])
+            j = 0
 
-    filecontent_output = ''.join(map(str, temp_filecontent_in_bits))
-
-    with open("output.txt", "w") as output_file:
-        output_file.write(filecontent_output)
+    for i in range(len(temp_binary)):
+        temp_binary[i] = int(temp_binary[i])
+    return temp_binary

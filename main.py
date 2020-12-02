@@ -1,11 +1,22 @@
 from generator import generate
 from encoder import encrypt_file
 from decoder import decode_file
+from input import toBinary
+from input import toData
 import math
 
+
+def isTrue(a, b):
+    for i in range(len(a)):
+        if (a[i] != b[i]):
+            print(i)
+            return False
+    return True
+
+
 if __name__ == "__main__":
-    key = generate(0.5, 0.5, 3, 0.5, math.pi / 2, 128)
-    filename = "input.txt"
-    encrypt_file(filename, key, 128)
-    output_filename = "output.txt"
-    decode_file(output_filename, key, 128)
+    filename = "input.jpg"
+    binary = toBinary(filename)
+    binaryEncrypt = encrypt_file(binary)
+    binaryDecode = decode_file(binaryEncrypt)
+    toData(binaryDecode)

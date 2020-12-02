@@ -1,46 +1,36 @@
-def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
-    n = int(bits, 2)
-    return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode(encoding, errors) or '\0'
+from generator import generate
+import math
 
 
 def logical_xor(a, b):
     if bool(a) == bool(b):
-        return False
+        return 0
     else:
-        return a or b
+        return 1
 
 
-def decode_file(filename, key, n):
-    with open(filename, "r") as input_file:
-        filecontent = input_file.read()
+def decode_file(binary):
+    temp_binary = [0] * len(binary)
+    for i in range(len(binary)):
+        temp_binary[i] = int(binary[i])
 
-    temp_key = [0 for i in range(n)]
-    for i in range(n):
-        temp_key[i] = key[i]
-
-    temp_filecontent = [0 for i in range(len(filecontent))]
-    for i in range(len(filecontent)):
-        temp_filecontent[i] = int(filecontent[i])
-
-    result_filecontent = [0 for i in range(len(filecontent))]
+    key = generate(0.5, 0.5, 3, 0.5, math.pi / 2, len(binary))
+    vectorInit = generate(0.5, 0.5, 3, 0.5, math.pi / 2, 256)
+    for i in range(128):
+        vectorInit[i] = int(vectorInit[128 + i])
 
     i = 0
     j = 0
-    while ((n * i + j) < (len(temp_filecontent))):
-        a = bool(temp_filecontent[n * i + j])
-        b = bool(temp_key[j])
-        result_filecontent[n * i + j] = str(int(logical_xor(a, b)))
+    while (128 * i + j < len(temp_binary)):
+        temp_binary[128 * i + j] = int(logical_xor(temp_binary[128 * i + j], key[128 * i + j]))
+        temp_binary[128 * i + j] = int(logical_xor(temp_binary[128 * i + j], vectorInit[j]))
         j += 1
-        if (j >= n):
-            j = 0
-            for cnt in range(n):
-                temp_key[cnt] = temp_filecontent[n * i + cnt]
+        if (j >= 128):
             i += 1
+            for j in range(128):
+                vectorInit[j] = int(binary[128 * (i - 1) + j])
+            j = 0
 
-    temp_string = ''.join(map(str, result_filecontent))
-    filecontent_output = text_from_bits(temp_string)
-
-    with open("result.txt", "w") as output_file:
-        output_file.write(filecontent_output)
-
-
+    for i in range(len(temp_binary)):
+        temp_binary[i] = int(temp_binary[i])
+    return temp_binary
