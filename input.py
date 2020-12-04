@@ -4,7 +4,7 @@ from io import BytesIO
 from PIL import Image
 import binascii
 
-def toBinary(filename):#filename = 'F:/py/example.png'
+def toBinary(filename): #filename = 'F:/py/example.png'
     with open(filename, 'rb') as file:
         binaryContent = b64encode(file.read())
     binary = [0 for i in range(len(binaryContent) * 7)]
@@ -15,10 +15,10 @@ def toBinary(filename):#filename = 'F:/py/example.png'
             binary[i * 7] = 0
             delta = 1
         for k in range(len(temp) - 2):
-            binary[i * 7 + k + delta] = int(temp[2 + k])#placing binary into array
+            binary[i * 7 + k + delta] = int(temp[2 + k]) #placing binary into array
     return binary
 
-def toData(binary):
+def toData(binary, filetype):
     byteCode = b''
     for i in range(len(binary) // 7):
         charBytes = ''
@@ -28,7 +28,7 @@ def toData(binary):
         byteCode += binascii.unhexlify('%x' % charToInt)
     picDecoded = BytesIO(b64decode(byteCode))
     imgRestored = Image.open(picDecoded)
-    showing = imgRestored.show()
+    imgRestored.save("output." + filetype, filetype)
 
 
 
