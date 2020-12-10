@@ -5,7 +5,7 @@ def logical_xor(a, b):
         return 1
 
 
-def encrypt_file(binary, key):
+def encrypt_file(binary, key, vector):
     temp_binary = [0] * len(binary)
     for i in range(len(binary)):
         temp_binary[i] = int(binary[i])
@@ -15,7 +15,7 @@ def encrypt_file(binary, key):
 
     temp_key = [0] * 128
     for i in range(128):
-        temp_key[i] = int(key[128 + i])
+        temp_key[i] = int(vector[i])
 
     i = 0
     j = 0
@@ -27,7 +27,4 @@ def encrypt_file(binary, key):
             for j in range(128):
                 temp_key[j] = int(temp_binary[128 * (i - 1) + j])
             j = 0
-
-    for i in range(len(temp_binary)):
-        temp_binary[i] = int(temp_binary[i])
     return temp_binary
