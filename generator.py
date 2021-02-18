@@ -1,7 +1,7 @@
 import math
 
 
-def generate(x0, y0, k, s, alpha, n):
+def generate_key(x0, y0, k, s, alpha, n):
     x = x0
     y = y0
     key = [0 for i in range(n)]
