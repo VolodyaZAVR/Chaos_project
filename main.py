@@ -1,37 +1,53 @@
-from generator import generate
-from encoder import encrypt_file
-from decoder import decode_file
-from input import toBinary
-from input import toData
+from generator import generate_key
+from encryption import encrypt_binary_data
+from encryption import decode_file
+from image import convert_to_binary
+from image import convert_to_data
 import imghdr
 import math
 import os.path
 
-if __name__ == "__main__":
+
+def write_in_file(filename, message):
+    with open(filename, 'w') as outfile:
+        for i in range(len(message)):
+            outfile.write(str(message[i]))
+
+
+def encrypt_file(filename):
+    binary = convert_to_binary(filename)
+    key = generate_key(0.5, 0.5, 3, 0.5, math.pi / 2, len(binary))
+    vector_init = generate_key(0.5, 0.5, 3, 0.5, math.pi / 2, 256)
+    for i in range(128):
+        vector_init[i] = int(vector_init[128 + i])
+
+    binary_encrypt = encrypt_binary_data(binary, key, vector_init)
+
+
+def main():
     while True:
         print('Input file name:')
         filename = input()
         if os.path.isfile(filename):
             break
-    type_of_file = imghdr.what(filename)
+        else:
+            print('File doesnt exist.')
+    filetype = imghdr.what(filename)
 
-    binary = toBinary(filename)
-    with open("input.txt", 'w') as outfile:
-        for i in range(len(binary)):
-            outfile.write(str(binary[i]))
+    binary = convert_to_binary(filename)
 
-    key = generate(0.5, 0.5, 3, 0.5, math.pi / 2, len(binary))
-    vector_init = generate(0.5, 0.5, 3, 0.5, math.pi / 2, 256)
+    key = generate_key(0.5, 0.5, 3, 0.5, math.pi / 2, len(binary))
+    vector_init = generate_key(0.5, 0.5, 3, 0.5, math.pi / 2, 256)
     for i in range(128):
         vector_init[i] = int(vector_init[128 + i])
 
-    binaryEncrypt = encrypt_file(binary, key, vector_init)
-    with open("encrypt.txt", 'w') as outfile:
-        for i in range(len(binaryEncrypt)):
-            outfile.write(str(binaryEncrypt[i]))
+    binary_encrypt = encrypt_binary_data(binary, key, vector_init)
+    write_in_file('encrypt.txt', binary_encrypt)
 
-    binaryDecode = decode_file(binaryEncrypt, key, vector_init)
-    with open("decode.txt", 'w') as outfile:
-        for i in range(len(binaryDecode)):
-            outfile.write(str(binaryDecode[i]))
-    toData(binaryDecode, type_of_file)
+    binary_decode = decode_file(binary_encrypt, key, vector_init)
+    write_in_file('decode.txt', binary_decode)
+    convert_to_data(binary_decode, filetype)
+
+
+if __name__ == '__main__':
+    main()
